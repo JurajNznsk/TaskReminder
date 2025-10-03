@@ -1,3 +1,3 @@
 # TaskReminder
-Android application (with widget)
-Taks Reminding.
+Android application (with widget).
+Task Reminder.
