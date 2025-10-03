@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">TaskReminder</string>
+    <!-- All -->
+    <string name="top_bar">Task Reminder</string>
+
+    <!-- To-Do Screen -->
+    <string name="todo_button">TO-DO</string>
+    <string name="done_button">DONE</string>
+    <string name="add_task">Add task</string>
+
 </resources>
