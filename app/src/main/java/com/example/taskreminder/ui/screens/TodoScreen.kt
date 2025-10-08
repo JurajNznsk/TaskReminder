@@ -41,11 +41,11 @@ import com.example.taskreminder.ui.theme.LightGray
 @Composable
 fun TodoScreen() {
     // TODO: Make task list load from local database
-    val tasks = listOf(
-        Task("MAS", "Predavacky"),
-        Task("SI", "Nic"),
-        Task("ZTS", "DU")
-    )
+//    val tasks = listOf(
+////        Task("MAS", "Predavacky"),
+////        Task("SI", "Nic"),
+////        Task("ZTS", "DU")
+//    )
 
 
     Scaffold (
@@ -96,7 +96,7 @@ fun TodoScreen() {
                     }
                 }
 
-                TaskList(tasks)
+                //TaskList(tasks)
             }
         }
 
