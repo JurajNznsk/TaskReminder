@@ -37,9 +37,11 @@ import com.example.taskreminder.R
 import com.example.taskreminder.data.Task
 import com.example.taskreminder.ui.theme.DarkGray
 import com.example.taskreminder.ui.theme.LightGray
+import com.example.taskreminder.ui.viewmodels.TasksViewmodel
 
 @Composable
-fun TodoScreen() {
+fun TaskScreen(
+) {
     // TODO: Make task list load from local database
 //    val tasks = listOf(
 ////        Task("MAS", "Predavacky"),
