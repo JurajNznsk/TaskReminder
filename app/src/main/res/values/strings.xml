@@ -7,5 +7,7 @@
     <string name="todo_button">TO-DO</string>
     <string name="done_button">DONE</string>
     <string name="add_task">Add task</string>
+    <string name="star_task">Mark task IMPORTANT</string>
+    <string name="done_task">Mark task DONE</string>
 
 </resources>
