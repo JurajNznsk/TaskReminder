@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,27 +20,41 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.example.taskreminder.R
 import com.example.taskreminder.data.Task
 import com.example.taskreminder.data.TasksDatabase
 import com.example.taskreminder.ui.theme.DarkGray
+import com.example.taskreminder.ui.theme.Gray
 import com.example.taskreminder.ui.theme.LightGray
 import com.example.taskreminder.ui.viewmodels.TasksViewModel
 
@@ -48,10 +63,13 @@ fun TaskScreen(
     viewModel: TasksViewModel = TasksViewModel(TasksDatabase.getInstance(LocalContext.current).tasksDao())
 ) {
     val tasks by viewModel.tasks.collectAsState()
+    var showAddTaskDialog by remember { mutableStateOf(false) }
 
     Scaffold (
         topBar = { TopAppBar() },
-        bottomBar = { BottomAppBar() },
+        bottomBar = { BottomAppBar(
+            onAddTaskButtonClick = {showAddTaskDialog = true}
+        ) },
         containerColor = DarkGray
     ) { innerPadding ->
         Box(
@@ -98,6 +116,16 @@ fun TaskScreen(
                 }
 
                 TaskList(tasks)
+                if (showAddTaskDialog) {
+                    AddTaskDialog(
+                        viewModel = viewModel,
+                        onDismiss = { showAddTaskDialog = false },
+                        onConfirm = {
+                            viewModel.addTask()
+                            showAddTaskDialog = false
+                        }
+                    )
+                }
             }
         }
 
@@ -200,14 +228,118 @@ fun TaskList(
 }
 
 @Composable
-fun BottomAppBar() {
+fun AddTaskDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+    viewModel: TasksViewModel
+) {
+    val acronym by viewModel.acronym.collectAsState()
+    val description by viewModel.description.collectAsState()
+
+    Dialog(
+        onDismissRequest = onDismiss
+    ) {
+        Surface(
+            shape = MaterialTheme.shapes.medium,
+            color = Gray,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(20.dp)
+                    .background(color = Gray)
+            ) {
+                Text(
+                    text = stringResource(R.string.dialog_add_task),
+                    fontSize = 20.sp,
+                    color = DarkGray
+                )
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = acronym,
+                    onValueChange = { viewModel.onAcronymChange(it) },
+                    label = { Text(text = stringResource(R.string.dialog_acronym)) },
+                    singleLine = true,
+                    textStyle = TextStyle(fontSize = 20.sp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.Black,
+                        focusedLabelColor = Color.Black,
+                        unfocusedLabelColor = LightGray,
+                        focusedBorderColor = Color.Black,
+                        unfocusedBorderColor = LightGray,
+                        cursorColor = Color.Black
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = description,
+                    onValueChange = { viewModel.onDescriptionChange(it) },
+                    label = {
+                        Text(
+                            text = stringResource(R.string.dialog_description)
+                        )
+                    },
+                    singleLine = false,
+                    textStyle = TextStyle(fontSize = 20.sp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.Black,
+                        focusedLabelColor = Color.Black,
+                        unfocusedLabelColor = LightGray,
+                        focusedBorderColor = Color.Black,
+                        unfocusedBorderColor = LightGray,
+                        cursorColor = Color.Black
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(
+                        onClick = onDismiss,
+                    ) {
+                        Text(
+                            text = stringResource(R.string.dialog_cancel),
+                            color = DarkGray
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(
+                        onClick = onConfirm,
+                        colors = ButtonDefaults.buttonColors(
+                            contentColor = LightGray,
+                            containerColor = Color.Black
+                        )
+                    ) {
+                        Text(stringResource(R.string.dialog_save))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun BottomAppBar(
+    onAddTaskButtonClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .padding(end = 16.dp, bottom = 60.dp)
     ) {
         Spacer(Modifier.weight(1f))
         Button(
-            onClick = {},
+            onClick = onAddTaskButtonClick,
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Black,
                 contentColor = LightGray
@@ -221,22 +353,4 @@ fun BottomAppBar() {
             )
         }
     }
-//    Box(
-//        modifier = Modifier
-//            .padding(start = 400.dp, bottom = 60.dp),
-//        contentAlignment = Alignment.BottomEnd
-//    ) {
-//        Button(
-//            onClick = {},
-//            colors = ButtonDefaults.buttonColors(
-//                containerColor = Color.Black,
-//                contentColor = LightGray
-//            )
-//        ) {
-//            Icon(
-//                imageVector = Icons.Default.Add,
-//                contentDescription = stringResource(R.string.add_task)
-//            )
-//        }
-//    }
 }

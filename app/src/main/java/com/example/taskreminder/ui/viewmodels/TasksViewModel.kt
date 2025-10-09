@@ -9,28 +9,57 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class TasksViewModel(private val tasksDao: TasksDao) : ViewModel() {
-
+    // Tasks list
     private val _tasks = MutableStateFlow<List<Task>>(emptyList())
     val tasks: StateFlow<List<Task>> = _tasks
+
+    // AddTaskDialog fields
+    var acronym = MutableStateFlow("")
+        private set
+    var description = MutableStateFlow("")
+        private set
 
     init {
         loadTasks()
     }
 
-    // Operation with Tasks stored
+    // Operations with AddTaskDialog
+    fun onAcronymChange(newAcronym: String) {
+        acronym.value = newAcronym
+    }
+    fun onDescriptionChange(newDescription: String) {
+        description.value = newDescription
+    }
+
+    // Operations with Tasks stored
     fun loadTasks() {
         viewModelScope.launch {
             _tasks.value = tasksDao.getAllTasks()
         }
     }
-    fun addTask(acronym: String, desription: String) {
+    fun addTask() {
         viewModelScope.launch {
-            val task = Task(acronym = acronym, description = desription)
+            var formattedAcronym = acronym.value.trim().uppercase()
+            if (formattedAcronym.isEmpty()) {
+                formattedAcronym = "###"
+            } else {
+                if (formattedAcronym.length > 3)
+                    formattedAcronym = formattedAcronym.take(3)
+                else (formattedAcronym.length < 3)
+                    formattedAcronym = "#".repeat(3 - formattedAcronym.length) + formattedAcronym
+            }
+
+            val task = Task(
+                acronym = formattedAcronym,
+                description = description.value)
             tasksDao.insertTask(task)
             loadTasks()
+            // Clean-up fields for next use
+            acronym.value = ""
+            description.value = ""
         }
     }
-    fun deletaTask(taskId: Int) {
+    fun deleteTask(taskId: Int) {
         viewModelScope.launch {
             tasksDao.deleteTaskById(taskId)
             loadTasks()
@@ -43,8 +72,9 @@ class TasksViewModel(private val tasksDao: TasksDao) : ViewModel() {
         }
     }
 
-    //
 
+
+    // ToDo Delete addTestTask()
     fun addTestTask() {
         viewModelScope.launch {
             val toBeDeletedTask = Task(acronym = "MAS", description = "Test T4")

@@ -10,4 +10,10 @@
     <string name="star_task">Mark task IMPORTANT</string>
     <string name="done_task">Mark task DONE</string>
 
+    <!-- Add Task Dialog Screen -->
+    <string name="dialog_add_task">Add Task</string>
+    <string name="dialog_acronym">Acronym</string>
+    <string name="dialog_description">Description</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="dialog_save">Save</string>
 </resources>
