@@ -26,29 +26,28 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.taskreminder.R
 import com.example.taskreminder.data.Task
+import com.example.taskreminder.data.TasksDatabase
 import com.example.taskreminder.ui.theme.DarkGray
 import com.example.taskreminder.ui.theme.LightGray
-import com.example.taskreminder.ui.viewmodels.TasksViewmodel
+import com.example.taskreminder.ui.viewmodels.TasksViewModel
 
 @Composable
 fun TaskScreen(
+    viewModel: TasksViewModel = TasksViewModel(TasksDatabase.getInstance(LocalContext.current).tasksDao())
 ) {
-    // TODO: Make task list load from local database
-//    val tasks = listOf(
-////        Task("MAS", "Predavacky"),
-////        Task("SI", "Nic"),
-////        Task("ZTS", "DU")
-//    )
-
+    val tasks by viewModel.tasks.collectAsState()
 
     Scaffold (
         topBar = { TopAppBar() },
@@ -98,7 +97,7 @@ fun TaskScreen(
                     }
                 }
 
-                //TaskList(tasks)
+                TaskList(tasks)
             }
         }
 
@@ -157,7 +156,7 @@ fun TaskItem(
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
             Text(
-                text = task.title,
+                text = task.acronym,
                 color = Color.White
             )
             Text(
@@ -202,17 +201,19 @@ fun TaskList(
 
 @Composable
 fun BottomAppBar() {
-    Box(
+    Row(
         modifier = Modifier
-            .padding(start = 400.dp, bottom = 60.dp),
-        contentAlignment = Alignment.BottomEnd
+            .padding(end = 16.dp, bottom = 60.dp)
     ) {
+        Spacer(Modifier.weight(1f))
         Button(
             onClick = {},
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Black,
                 contentColor = LightGray
-            )
+            ),
+            modifier = Modifier
+                .padding(top = 8.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.Add,
@@ -220,4 +221,22 @@ fun BottomAppBar() {
             )
         }
     }
+//    Box(
+//        modifier = Modifier
+//            .padding(start = 400.dp, bottom = 60.dp),
+//        contentAlignment = Alignment.BottomEnd
+//    ) {
+//        Button(
+//            onClick = {},
+//            colors = ButtonDefaults.buttonColors(
+//                containerColor = Color.Black,
+//                contentColor = LightGray
+//            )
+//        ) {
+//            Icon(
+//                imageVector = Icons.Default.Add,
+//                contentDescription = stringResource(R.string.add_task)
+//            )
+//        }
+//    }
 }
