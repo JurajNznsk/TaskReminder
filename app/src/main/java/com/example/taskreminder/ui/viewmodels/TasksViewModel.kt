@@ -91,4 +91,11 @@ class TasksViewModel(private val tasksDao: TasksDao) : ViewModel() {
             loadTasks()
         }
     }
+    fun changeTodoDone(task: Task) {
+        viewModelScope.launch {
+            val updatedTask = task.copy(todo = !task.todo)
+            tasksDao.updateTask(updatedTask)
+            loadTasks()
+        }
+    }
 }

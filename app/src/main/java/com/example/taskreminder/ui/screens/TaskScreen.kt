@@ -17,10 +17,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
@@ -28,6 +29,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -49,6 +51,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -66,6 +70,7 @@ fun TaskScreen(
     viewModel: TasksViewModel = TasksViewModel(TasksDatabase.getInstance(LocalContext.current).tasksDao())
 ) {
     var showAddTaskDialog by remember { mutableStateOf(false) }
+    var showToDoTab by remember { mutableStateOf(true) }
     val tasks by viewModel.tasks.collectAsState()
 
     Scaffold (
@@ -88,11 +93,11 @@ fun TaskScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Button(
-                        onClick = {},
+                    OutlinedButton(
+                        onClick = { showToDoTab = true },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Black,
-                            contentColor = LightGray
+                            containerColor = if (showToDoTab) Color.Black else Color.Transparent,
+                            contentColor = if (showToDoTab) Color.White else LightGray
                         ),
                         modifier = Modifier
                             .weight(1f)
@@ -101,11 +106,11 @@ fun TaskScreen(
                             text = stringResource(R.string.todo_button)
                         )
                     }
-                    Button(
-                        onClick = {},
+                    OutlinedButton(
+                        onClick = { showToDoTab = false },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Black,
-                            contentColor = LightGray
+                            containerColor = if (!showToDoTab) Color.Black else Color.Transparent,
+                            contentColor = if (!showToDoTab) Color.White else LightGray
                         ),
                         modifier = Modifier
                             .weight(1f)
@@ -118,7 +123,8 @@ fun TaskScreen(
 
                 TaskList(
                     tasks = tasks,
-                    viewModel
+                    showToDoTab = showToDoTab,
+                    viewModel = viewModel
                 )
                 if (showAddTaskDialog) {
                     AddTaskDialog(
@@ -157,6 +163,7 @@ fun TopAppBar() {
 fun TaskItem(
     task: Task,
     onDoneClick: () -> Unit,
+    onDeleteClick: () -> Unit,
     onStarClick: () -> Unit
 ) {
     Row(
@@ -196,7 +203,7 @@ fun TaskItem(
             onClick = onDoneClick
         ) {
             Icon(
-                imageVector = Icons.Default.CheckCircle,
+                imageVector = if (task.todo) Icons.Default.Check else Icons.Default.Clear,
                 contentDescription = stringResource(R.string.done_task),
                 tint = Platinum
             )
@@ -218,7 +225,17 @@ fun TaskItem(
         }
 
         Spacer(Modifier.weight(1f))
-
+        if (!task.todo) {
+            IconButton(
+                onClick = onDeleteClick
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = stringResource(R.string.delete_task),
+                    tint = Color.White
+                )
+            }
+        }
         IconButton(
             onClick = onStarClick
         ) {
@@ -234,22 +251,28 @@ fun TaskItem(
 @Composable
 fun TaskList(
     tasks: List<Task>,
+    showToDoTab: Boolean,
     viewModel: TasksViewModel
 ) {
-   LazyColumn(
-       modifier = Modifier
-           .fillMaxSize(),
-       contentPadding = PaddingValues(vertical = 8.dp)
-   ) {
-       items(tasks) { task ->
-           TaskItem(
-               task = task,
-               onDoneClick = {},
-               onStarClick = { viewModel.changeImportance(task) }
-           )
-           Spacer(modifier = Modifier.height(4.dp))
-       }
-   }
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize(),
+        contentPadding = PaddingValues(vertical = 8.dp)
+    ) {
+        val filteredTasks = tasks.filter { task ->
+            showToDoTab && task.todo || !showToDoTab && !task.todo
+        }
+
+        items(filteredTasks) { task ->
+            TaskItem(
+                task = task,
+                onDoneClick = { viewModel.changeTodoDone(task) },
+                onDeleteClick = { viewModel.deleteTask(task.id) },
+                onStarClick = { viewModel.changeImportance(task) }
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+        }
+    }
 }
 
 @Composable
@@ -287,6 +310,10 @@ fun AddTaskDialog(
                     onValueChange = { viewModel.onAcronymChange(it) },
                     label = { Text(text = stringResource(R.string.dialog_acronym)) },
                     singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Characters,
+                        keyboardType = KeyboardType.Text
+                    ),
                     textStyle = TextStyle(fontSize = 20.sp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = Color.Black,
