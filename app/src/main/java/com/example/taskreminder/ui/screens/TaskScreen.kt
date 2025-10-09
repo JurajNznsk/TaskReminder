@@ -1,6 +1,7 @@
 package com.example.taskreminder.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
@@ -39,7 +42,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -53,14 +58,15 @@ import com.example.taskreminder.data.TasksDatabase
 import com.example.taskreminder.ui.theme.DarkGray
 import com.example.taskreminder.ui.theme.Gray
 import com.example.taskreminder.ui.theme.LightGray
+import com.example.taskreminder.ui.theme.Platinum
 import com.example.taskreminder.ui.viewmodels.TasksViewModel
 
 @Composable
 fun TaskScreen(
     viewModel: TasksViewModel = TasksViewModel(TasksDatabase.getInstance(LocalContext.current).tasksDao())
 ) {
-    val tasks by viewModel.tasks.collectAsState()
     var showAddTaskDialog by remember { mutableStateOf(false) }
+    val tasks by viewModel.tasks.collectAsState()
 
     Scaffold (
         topBar = { TopAppBar() },
@@ -110,7 +116,10 @@ fun TaskScreen(
                     }
                 }
 
-                TaskList(tasks)
+                TaskList(
+                    tasks = tasks,
+                    viewModel
+                )
                 if (showAddTaskDialog) {
                     AddTaskDialog(
                         viewModel = viewModel,
@@ -157,6 +166,26 @@ fun TaskItem(
             .padding(
                 horizontal = 16.dp
             )
+            .then(
+                if (task.important) {
+                    Modifier.border(
+                        width = 4.dp,
+                        brush = Brush.linearGradient(
+                            colors = listOf(
+                                Color.Red,
+                                Color.Yellow,
+                                Color.Green,
+                                Color.Blue,
+                                Color.Magenta
+                            ),
+                            tileMode = TileMode.Mirror
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                } else {
+                    Modifier // no border if not important
+                }
+            )
             .background(
                 color = Color.Black,
                 shape = RoundedCornerShape(12.dp)
@@ -167,9 +196,9 @@ fun TaskItem(
             onClick = onDoneClick
         ) {
             Icon(
-                imageVector = Icons.Default.Delete,
+                imageVector = Icons.Default.CheckCircle,
                 contentDescription = stringResource(R.string.done_task),
-                tint = Color.White
+                tint = Platinum
             )
         }
         Column(
@@ -196,7 +225,7 @@ fun TaskItem(
             Icon(
                 imageVector = Icons.Default.Star,
                 contentDescription = stringResource(R.string.star_task),
-                tint = Color.White
+                tint = if (task.important) Color.Yellow else Color.White
             )
         }
     }
@@ -204,7 +233,8 @@ fun TaskItem(
 
 @Composable
 fun TaskList(
-    tasks: List<Task>
+    tasks: List<Task>,
+    viewModel: TasksViewModel
 ) {
    LazyColumn(
        modifier = Modifier
@@ -215,7 +245,7 @@ fun TaskList(
            TaskItem(
                task = task,
                onDoneClick = {},
-               onStarClick = {}
+               onStarClick = { viewModel.changeImportance(task) }
            )
            Spacer(modifier = Modifier.height(4.dp))
        }

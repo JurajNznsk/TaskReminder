@@ -10,5 +10,8 @@ data class Task(
     val acronym: String,
     val description: String,
     val evenDate: String, // dd.mm.yyyy
-    val eventTime: String // HH:mm
+    val eventTime: String, // HH:mm
+
+    val important: Boolean, // T - starClicked; F - starNotClicked
+    val todo: Boolean // T - showing in TO-DO tab; F - showing in DONE tab
 )

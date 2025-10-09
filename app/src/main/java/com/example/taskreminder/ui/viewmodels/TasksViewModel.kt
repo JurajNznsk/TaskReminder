@@ -60,13 +60,16 @@ class TasksViewModel(private val tasksDao: TasksDao) : ViewModel() {
                 acronym = formattedAcronym,
                 description = description.value,
                 evenDate = eventDate.value,
-                eventTime = eventTime.value
+                eventTime = eventTime.value,
+                important = false,
+                todo = true
             )
             tasksDao.insertTask(task)
             loadTasks()
             // Clean-up fields for next use
             acronym.value = ""
             description.value = ""
+            // TODO Clean date and time
         }
     }
     fun deleteTask(taskId: Int) {
@@ -78,6 +81,13 @@ class TasksViewModel(private val tasksDao: TasksDao) : ViewModel() {
     fun clearTasks() {
         viewModelScope.launch {
             tasksDao.deleteAllTasks()
+            loadTasks()
+        }
+    }
+    fun changeImportance(task: Task) {
+        viewModelScope.launch {
+            val updatedTask = task.copy(important = !task.important)
+            tasksDao.updateTask(updatedTask)
             loadTasks()
         }
     }

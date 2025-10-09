@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [Task::class], version = 2, exportSchema = false)
+@Database(entities = [Task::class], version = 3, exportSchema = false)
 abstract class TasksDatabase : RoomDatabase() {
     abstract fun tasksDao(): TasksDao
 
@@ -20,7 +20,7 @@ abstract class TasksDatabase : RoomDatabase() {
                                 TasksDatabase::class.java,
                                 "tasks_database"
                             )
-                    .fallbackToDestructiveMigration(true)
+                    .fallbackToDestructiveMigration(true) // TODO Delete this fallbackToDes...after final version of DB
                     .build()
                 INSTANCE = instance
                 instance
