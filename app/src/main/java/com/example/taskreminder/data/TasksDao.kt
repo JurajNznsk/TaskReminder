@@ -7,7 +7,7 @@ import androidx.room.Query
 
 @Dao
 interface TasksDao {
-    @Query("SELECT * FROM tasks")
+    @Query("SELECT * FROM tasks ORDER BY evenDate ASC, eventTime ASC")
     suspend fun getAllTasks(): List<Task>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

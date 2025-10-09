@@ -8,5 +8,7 @@ data class Task(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val acronym: String,
-    val description: String
+    val description: String,
+    val evenDate: String, // dd.mm.yyyy
+    val eventTime: String // HH:mm
 )

@@ -20,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -32,8 +31,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextFieldColors
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -77,9 +74,7 @@ fun TaskScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            Column(
-
-            ) {
+            Column {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -184,7 +179,7 @@ fun TaskItem(
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
             Text(
-                text = task.acronym,
+                text = task.acronym + "  -  " + task.eventTime + "   " + task.evenDate,
                 color = Color.White
             )
             Text(
@@ -298,6 +293,7 @@ fun AddTaskDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                 )
+                // TODO Add date and time pickers
                 Spacer(Modifier.height(8.dp))
                 Row(
                     modifier = Modifier
