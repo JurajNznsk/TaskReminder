@@ -7,6 +7,10 @@ import com.example.taskreminder.data.TasksDao
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 class TasksViewModel(private val tasksDao: TasksDao) : ViewModel() {
     // Tasks list
@@ -18,9 +22,11 @@ class TasksViewModel(private val tasksDao: TasksDao) : ViewModel() {
         private set
     var description = MutableStateFlow("")
         private set
-    var eventDate = MutableStateFlow("00.00.0000")
+    private val dateFormat = SimpleDateFormat("EE dd.MM.yyyy", Locale.getDefault())
+    var eventDate = MutableStateFlow(dateFormat.format(Date()))
         private set
-    var eventTime = MutableStateFlow("00:00")
+    private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+    var eventTime = MutableStateFlow(timeFormat.format(Date()))
         private set
 
     init {
@@ -74,7 +80,11 @@ class TasksViewModel(private val tasksDao: TasksDao) : ViewModel() {
             // Clean-up fields for next use
             acronym.value = ""
             description.value = ""
-            // TODO Clean date and time
+            val currentCalendar = Calendar.getInstance()
+            val dateFormatter = SimpleDateFormat("EE dd.MM.yyyy", Locale.getDefault())
+            eventDate.value = dateFormatter.format(currentCalendar.time)
+            val timeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault())
+            eventTime.value = timeFormatter.format(currentCalendar.time)
         }
     }
     fun deleteTask(taskId: Int) {

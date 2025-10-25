@@ -67,7 +67,9 @@ import com.example.taskreminder.ui.theme.Gray
 import com.example.taskreminder.ui.theme.LightGray
 import com.example.taskreminder.ui.theme.Platinum
 import com.example.taskreminder.ui.viewmodels.TasksViewModel
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 
 @Composable
 fun TaskScreen(
@@ -290,10 +292,6 @@ fun AddTaskDialog(
     val eventDate by viewModel.eventDate.collectAsState()
     val eventTime by viewModel.eventTime.collectAsState()
 
-    // Local stated for showing dialogs
-    var showDateDialog by remember { mutableStateOf(false) }
-    var showTimeDialog by remember { mutableStateOf(false) }
-
     // Date Picker Dialog
     val context = LocalContext.current
     val calendar = remember { Calendar.getInstance() }
@@ -301,7 +299,17 @@ fun AddTaskDialog(
         DatePickerDialog(
             context,
             { _, year, month, dayOfMonth ->
-                val formattedDate = "%04d-%02d-%02d".format(year, month + 1, dayOfMonth)
+                val selectedCalendar = Calendar.getInstance().apply {
+                    set(year, month, dayOfMonth)
+                }
+
+                // Get day name in Slovak locale (abbreviated)
+                val dayFormat = SimpleDateFormat("EE", Locale("sk"))
+                val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+
+                val dayName = dayFormat.format(selectedCalendar.time)
+                val formattedDate = "$dayName ${dateFormat.format(selectedCalendar.time)}"
+
                 viewModel.onDateChange(formattedDate)
             },
             calendar.get(Calendar.YEAR),
