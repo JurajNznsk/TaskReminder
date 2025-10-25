@@ -34,7 +34,12 @@ class TasksViewModel(private val tasksDao: TasksDao) : ViewModel() {
     fun onDescriptionChange(newDescription: String) {
         description.value = newDescription
     }
-    fun onDateChange() {}
+    fun onDateChange(newDate: String) {
+        eventDate.value = newDate
+    }
+    fun onTimeChange(newTime: String) {
+        eventTime.value = newTime
+    }
 
     // Operations with Tasks stored
     private fun loadTasks() {

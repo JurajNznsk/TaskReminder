@@ -1,5 +1,8 @@
 package com.example.taskreminder.ui.screens
 
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -64,6 +67,7 @@ import com.example.taskreminder.ui.theme.Gray
 import com.example.taskreminder.ui.theme.LightGray
 import com.example.taskreminder.ui.theme.Platinum
 import com.example.taskreminder.ui.viewmodels.TasksViewModel
+import java.util.Calendar
 
 @Composable
 fun TaskScreen(
@@ -283,7 +287,44 @@ fun AddTaskDialog(
 ) {
     val acronym by viewModel.acronym.collectAsState()
     val description by viewModel.description.collectAsState()
+    val eventDate by viewModel.eventDate.collectAsState()
+    val eventTime by viewModel.eventTime.collectAsState()
 
+    // Local stated for showing dialogs
+    var showDateDialog by remember { mutableStateOf(false) }
+    var showTimeDialog by remember { mutableStateOf(false) }
+
+    // Date Picker Dialog
+    val context = LocalContext.current
+    val calendar = remember { Calendar.getInstance() }
+    val datePickerDialog = remember {
+        DatePickerDialog(
+            context,
+            { _, year, month, dayOfMonth ->
+                val formattedDate = "%04d-%02d-%02d".format(year, month + 1, dayOfMonth)
+                viewModel.onDateChange(formattedDate)
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+    }
+
+    // Time Picker Dialog
+    val timePickerDialog = remember {
+        TimePickerDialog(
+            context,
+            { _, hour, minute ->
+                val formattedTime = String.format("%02d:%02d", hour, minute)
+                viewModel.onTimeChange(formattedTime)
+            },
+            calendar.get(Calendar.HOUR_OF_DAY),
+            calendar.get(Calendar.MINUTE),
+            true
+        )
+    }
+
+    // Main dialog
     Dialog(
         onDismissRequest = onDismiss
     ) {
@@ -316,8 +357,8 @@ fun AddTaskDialog(
                     ),
                     textStyle = TextStyle(fontSize = 20.sp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.Black,
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
                         focusedLabelColor = Color.Black,
                         unfocusedLabelColor = LightGray,
                         focusedBorderColor = Color.Black,
@@ -339,8 +380,8 @@ fun AddTaskDialog(
                     singleLine = false,
                     textStyle = TextStyle(fontSize = 20.sp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.Black,
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
                         focusedLabelColor = Color.Black,
                         unfocusedLabelColor = LightGray,
                         focusedBorderColor = Color.Black,
@@ -350,11 +391,62 @@ fun AddTaskDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                 )
-                // TODO Add date and time pickers
+                Spacer(Modifier.height(16.dp))
+                Row (
+                    horizontalArrangement = Arrangement
+                        .spacedBy(4.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    // Date picker trigger
+                    OutlinedButton(
+                        onClick = { datePickerDialog.show() },
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = Gray,
+                            contentColor = Color.LightGray
+                        ),
+                        border = BorderStroke(
+                            width = 1.dp,
+                            color = LightGray
+                        ),
+                        shape = MaterialTheme.shapes.small,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(56.dp)
+                    ) {
+                        Text(
+                            text = eventDate,
+                            fontSize = 18.sp,
+                            color = Color.White,
+                            modifier = Modifier
+                                .padding(horizontal = 4.dp)
+                        )
+                    }
+                    // Time picker trigger
+                    OutlinedButton(
+                        onClick = { timePickerDialog.show() },
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = Gray,
+                            contentColor = Color.LightGray
+                        ),
+                        border = BorderStroke(1.dp, LightGray),
+                        shape = MaterialTheme.shapes.small,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(56.dp)
+                    ) {
+                        Text(
+                            text = eventTime,
+                            fontSize = 18.sp,
+                            color = Color.White,
+                            modifier = Modifier
+                                .padding(horizontal = 4.dp)
+                        )
+                    }
+                }
                 Spacer(Modifier.height(8.dp))
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
                         .padding(top = 16.dp),
                     horizontalArrangement = Arrangement.End
                 ) {
